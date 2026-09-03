@@ -12,7 +12,6 @@ demo1/
 │   └── test_1k.txt    # 测试数据
 ├── train.py           # 数据处理、训练与验证
 ├── test.py            # 加载 best_model.pth 并测试
-├── require.py         # 依赖与环境说明
 └── README.md
 ```
 
@@ -51,27 +50,9 @@ pip install torch transformers tensorboard
 
 首次运行需要联网下载 `bert-base-chinese` 预训练模型和分词器。
 
-## 运行
-
-训练：
-
-```bash
-python train.py
-```
-
-脚本会在每个 epoch 结束后运行一次验证，并在验证准确率提高时把模型权重保存到：
-
-```text
-best_model.pth
-```
-
-测试：
-
-```bash
-python test.py
-```
-
 测试脚本会加载 `best_model.pth`，在 `data/test_1k.txt` 上输出测试准确率。
+
+画图用的是tensorboard
 
 查看训练曲线：
 
@@ -89,10 +70,3 @@ tensorboard --logdir log
 - 默认训练轮数：3
 - 批大小：训练和验证均为 12
 
-## 后续优化方向
-
-- 按实际出现的 15 个类别重新映射标签，避免两个永远没有样本的输出类别
-- 调整关键词拼接方式，让标题和关键词都有更明确的边界
-- 增加训练轮数并配合 warmup、学习率衰减和早停
-- 尝试 `hfl/chinese-roberta-wwm-ext` 等更强的中文预训练模型
-- 在验证集上做错误分析，再针对容易混淆的类别补数据
