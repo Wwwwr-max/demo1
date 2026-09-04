@@ -97,13 +97,10 @@ if __name__ == "__main__":
             loss.backward()
             optim.step()
             total_train_loss += loss.item()
-            if i == 1:
-                writer.add_scalar('1loss/setp',loss,step)
-            elif i == 2:
-                writer.add_scalar('2loss/setp',loss,step)
-            else:
-                writer.add_scalar('3loss/setp',loss,step)
+        aver_loss = total_train_loss/len(train_loader)
+        writer.add_scalar('aver/epoch',aver_loss,i+1)
         acc = val()
+        writer.add_scalar('acc/epoch',acc,i+1)
         print(f"\n==== epoch {i + 1} finish, dev acc:{acc:.4f} ====\n")
         if acc>best_acc:
             best_acc = acc
