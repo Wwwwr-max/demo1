@@ -35,7 +35,6 @@ class MyDataset(Dataset):
         return self.items[index]
 # 将文本分词编码
 tokenizer = AutoTokenizer.from_pretrained("bert-base-chinese")
-# 将文本分词编码
 def collate_fn(items):
     texts = [x['text'] for x in items]
     labels = [x['label'] for x in items]
