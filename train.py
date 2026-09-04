@@ -1,10 +1,8 @@
-import json
 import torch
-import dataset,model_m
+import dataset,model_m,config
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-with open("./demo_config.json",'r',encoding='utf-8') as f:
-    demo_config = json.load(f)
+demo_config = config.load_config()
 def yz(loader, model, device):
     model.eval()
     total_correct = 0
@@ -20,7 +18,7 @@ def yz(loader, model, device):
         model.train()
         return acc
 
-def xl(loader):
+def xl(loader, model, device, loss_fn, optim):
     model.train()
     total_train_loss = 0.0
     for step, batch in enumerate(loader):
@@ -37,15 +35,18 @@ def xl(loader):
 # 加载数据集
 if __name__ == "__main__":
     writer = SummaryWriter('./log')
+    tokenizer = model_m.load_tokenizer(demo_config["model_path"])
+    collate_fn = model_m.make_collate_fn(tokenizer, demo_config["max_length"])
     train = dataset.Mydata(demo_config['train_path'])
     train_loader = DataLoader(train,batch_size = demo_config['batch_size'],
-                                  shuffle = True,collate_fn = model_m.collate_fn)
+                                  shuffle = True,collate_fn = collate_fn)
     dev = dataset.Mydata(demo_config['dev_path'])
     dev_loader = DataLoader(dev,batch_size = demo_config['batch_size'],
-                                  shuffle = False,collate_fn = model_m.collate_fn)
+                                  shuffle = False,collate_fn = collate_fn)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = model_m.Mymodel(num_labels=demo_config["num_labels"])
+    model = model_m.Mymodel(model_path=demo_config["model_path"],
+                            num_labels=demo_config["num_labels"])
     model.to(device)
     optim = torch.optim.AdamW(model.parameters(),lr = demo_config['learning_rate'])
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     best_acc = 0.0
     for e in range(epoch):
         print(f"===== Epoch {e+1}/{epoch} =====")
-        avg_loss = xl(train_loader)
+        avg_loss = xl(train_loader,model, device, loss_fn, optim)
         dev_acc = yz(dev_loader, model, device)
         writer.add_scalar('aver/epoch', avg_loss, e + 1)
         writer.add_scalar('acc/epoch', dev_acc, e + 1)
