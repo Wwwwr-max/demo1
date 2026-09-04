@@ -12,6 +12,7 @@ demo1/
 │   └── test_1k.txt    # 测试数据
 ├── train.py           # 数据处理、训练与验证
 ├── test.py            # 加载 best_model.pth 并测试
+|── picture            # 曲线图
 └── README.md
 ```
 
@@ -70,3 +71,5 @@ tensorboard --logdir log
 - 默认训练轮数：3
 - 批大小：训练和验证均为 12
 
+## 结果
+- 在三轮训练后在验证集上的准确率到达85.5%,在验证集上的准确率达到85.71%
