@@ -45,10 +45,6 @@ id_!_code_!_name_!_title_!_key
 
 ## 环境依赖
 
-```bash
-pip install torch transformers tensorboard
-```
-
 首次运行需要联网下载 `bert-base-chinese` 预训练模型和分词器。
 
 测试脚本会加载 `best_model.pth`，在 `data/test_1k.txt` 上输出测试准确率。
