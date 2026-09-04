@@ -11,6 +11,7 @@ demo1
 ├── model_m.py                           # tokenizer、模型与 batch 处理
 ├── train.py                             # 训练入口
 ├── test.py                              # 测试入口
+├── config.py                            # 运行json
 ├── data/                                # 原始数据集
 │   ├── train_3k.txt                     # 训练集
 │   ├── dev_1k.txt                       # 验证集
