@@ -6,6 +6,6 @@
   "num_labels" : 17,
   "batch_size" : 12,
   "learning_rate" : 1e-5,
-  "epoch" : 3,
+  "epoch" : 12,
   "model_path" : "./pretrain/bert-base-chinese"
 }
