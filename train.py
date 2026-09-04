@@ -1,9 +1,11 @@
 import torch
+from transformers import AutoTokenizer
+
 import dataset,model_m,config
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 demo_config = config.load_config()
-def yz(loader, model, device):
+def verify(loader, model, device):
     model.eval()
     total_correct = 0
     total_num = 0
@@ -18,7 +20,7 @@ def yz(loader, model, device):
         model.train()
         return acc
 
-def xl(loader, model, device, loss_fn, optim):
+def train_T(loader, model, device, loss_fn, optim):
     model.train()
     total_train_loss = 0.0
     for step, batch in enumerate(loader):
@@ -35,8 +37,8 @@ def xl(loader, model, device, loss_fn, optim):
 # 加载数据集
 if __name__ == "__main__":
     writer = SummaryWriter('./log')
-    tokenizer = model_m.load_tokenizer(demo_config["model_path"])
-    collate_fn = model_m.make_collate_fn(tokenizer, demo_config["max_length"])
+    tokenizer = AutoTokenizer.from_pretrained(demo_config['model_path'])
+    collate_fn = dataset.make_collate_fn(tokenizer, demo_config["max_length"])
     train = dataset.Mydata(demo_config['train_path'])
     train_loader = DataLoader(train,batch_size = demo_config['batch_size'],
                                   shuffle = True,collate_fn = collate_fn)
@@ -54,8 +56,8 @@ if __name__ == "__main__":
     best_acc = 0.0
     for e in range(epoch):
         print(f"===== Epoch {e+1}/{epoch} =====")
-        avg_loss = xl(train_loader,model, device, loss_fn, optim)
-        dev_acc = yz(dev_loader, model, device)
+        avg_loss = train_T(train_loader,model, device, loss_fn, optim)
+        dev_acc = verify(dev_loader, model, device)
         writer.add_scalar('aver/epoch', avg_loss, e + 1)
         writer.add_scalar('acc/epoch', dev_acc, e + 1)
         print(f"train_loss:{avg_loss:.4f} | dev_acc:{dev_acc:.4f}")

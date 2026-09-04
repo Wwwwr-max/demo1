@@ -1,23 +1,7 @@
 import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, BertModel
-def load_tokenizer(model_path):
-    return AutoTokenizer.from_pretrained(model_path)
 
-def make_collate_fn(tokenizer, max_length):
-    def collate_fn(items):
-        texts = [x["text"] for x in items]
-        labels = [x["labels"] for x in items]
-        out = tokenizer(
-            texts,
-            truncation=True,
-            padding=True,
-            max_length=max_length,
-            return_tensors="pt",
-        )
-        out["labels"] = torch.tensor(labels, dtype=torch.long)
-        return out
-    return collate_fn
 
 class Mymodel(nn.Module):
     def __init__(self, model_path, num_labels):

@@ -1,6 +1,20 @@
 from torch.utils.data import Dataset
+import torch
 # 处理数据
-
+def make_collate_fn(tokenizer, max_length):
+    def collate_fn(items):
+        texts = [x["text"] for x in items]
+        labels = [x["labels"] for x in items]
+        out = tokenizer(
+            texts,
+            truncation=True,
+            padding=True,
+            max_length=max_length,
+            return_tensors="pt",
+        )
+        out["labels"] = torch.tensor(labels, dtype=torch.long)
+        return out
+    return collate_fn
 def pro_data(root):
     items = []
     with open(root,'r',encoding='utf-8') as f:
