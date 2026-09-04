@@ -1,0 +1,4 @@
+# 项目直接依赖
+torch
+transformers
+tensorboard
