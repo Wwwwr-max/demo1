@@ -12,7 +12,7 @@ demo1/
 │   └── test_1k.txt    # 测试数据
 ├── train.py           # 数据处理、训练与验证
 ├── test.py            # 加载 best_model.pth 并测试
-|── picture            # 曲线图
+├──picture            # 曲线图
 └── README.md
 ```
 
