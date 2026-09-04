@@ -33,7 +33,7 @@ class MyDataset(Dataset):
 
     def __getitem__(self,index):
         return self.items[index]
-# 读取文本和标签
+# 将文本分词编码
 tokenizer = AutoTokenizer.from_pretrained("bert-base-chinese")
 # 将文本分词编码
 def collate_fn(items):
