@@ -31,7 +31,6 @@ class Mymodel(nn.Module):
             input_ids = input_ids,
             attention_mask = attention_mask,
             token_type_ids = token_type_ids,
-            labels =labels
         )
         cls_emb = bert_out.last_hidden_state[:, 0, :]
         logits = self.liner(cls_emb)
