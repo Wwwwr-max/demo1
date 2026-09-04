@@ -31,10 +31,9 @@ demo1
 - `dataset.py`
   `pro_data()` 解析原始数据，把分类码 `code - 100` 转成从 0 开始的标签。
   `Mydata` 继承 `torch.utils.data.Dataset`，保存文本和标签。
+  `make_collate_fn(tokenizer, max_length)`：对一个 batch 的文本进行截断、填充和标签整理。
 
 - `model_m.py`
-  - `load_tokenizer(model_path)`：加载本地 tokenizer。
-  - `make_collate_fn(tokenizer, max_length)`：对一个 batch 的文本进行截断、填充和标签整理。
   - `Mymodel`：使用 `BertModel + Linear`，取 BERT 输出的 CLS 向量，再经过全连接层输出 17 类 logits。
 
 - `train.py`
