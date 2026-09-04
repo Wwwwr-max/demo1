@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer,AutoModelForSequenceClassification,Trainer,TrainingArguments
+from transformers import AutoTokenizer,AutoModelForSequenceClassification
 from torch.utils.data import Dataset,DataLoader
 from torch.utils.tensorboard import SummaryWriter
 # 处理数据，提取出标题或关键词和分类id
