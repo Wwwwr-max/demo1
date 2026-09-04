@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from transformers import AutoTokenizer, BertModel
+from transformers import BertModel
 
 
 class Mymodel(nn.Module):
