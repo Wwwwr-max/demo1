@@ -5,15 +5,21 @@
 ## 项目结构
 
 ```text
-demo1/
-├── data/
-│   ├── train_3k.txt   # 训练数据
-│   ├── dev_1k.txt     # 验证数据
-│   └── test_1k.txt    # 测试数据
-├── train.py           # 数据处理、训练与验证
-├── test.py            # 加载 best_model.pth 并测试
-├── picture            # 曲线图
-└── README.md
+demo1
+├── demo_config.json                     # 全局配置
+├── dataset.py                           # 数据处理
+├── model_m.py                           # tokenizer、模型与 batch 处理
+├── train.py                             # 训练入口
+├── test.py                              # 测试入口
+├── data/                                # 原始数据集
+│   ├── train_3k.txt                     # 训练集
+│   ├── dev_1k.txt                       # 验证集
+│   └── test_1k.txt                      # 测试集
+├── pretrain/
+│   └── bert-base-chinese/               # 本地预训练模型
+├── log/                                 # TensorBoard 日志
+├── picture/                             # 结果截图
+└── best_model.pth                       # 最优模型权重
 ```
 
 ## 数据格式
