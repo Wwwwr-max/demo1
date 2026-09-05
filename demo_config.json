@@ -5,6 +5,6 @@
   "test_path" : "./data/test_1k.txt",
   "batch_size" : 12,
   "learning_rate" : 1e-5,
-  "epoch" : 12,
+  "epoch" : 14,
   "model_path" : "./pretrain/bert-base-chinese"
 }
