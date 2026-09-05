@@ -110,3 +110,4 @@ tensorboard --logdir=./log
 - 最优`dev_acc`: **0.8670**，最优`macro‑F1`: **0.8618**，出现在 Epoch 3
 - `best_model.pth` 保存第 3 轮模型权重
 - 早停 patience=4，第 7 轮触发早停终止训练
+- 最终测试集的指标为test_acc:0.8496 | p_macro:0.7368 | r_macro:0.7390 | f1_macro:0.7369
