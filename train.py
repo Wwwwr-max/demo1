@@ -1,6 +1,6 @@
 import torch
 from transformers import AutoTokenizer
-
+from sklearn.metrics import precision_score, recall_score, f1_score
 import dataset,model_m,config
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -9,6 +9,8 @@ def verify(loader, model, device):
     model.eval()
     total_correct = 0
     total_num = 0
+    y_true = []
+    y_pre = []
     with torch.no_grad():
         for batch in loader:
             batch = {k: v.to(device) for k, v in batch.items()}
@@ -16,9 +18,14 @@ def verify(loader, model, device):
             per = torch.argmax(output, dim=-1)
             total_correct += (per == batch["labels"]).sum().item()
             total_num += batch["labels"].size(0)
+            y_true.extend(batch['labels'].cpu().numpy().tolist())
+            y_pre.extend(per.cpu().numpy().tolist())
         acc = total_correct / total_num
+        p_macro = precision_score(y_true, y_pre, average="macro", zero_division=0)
+        r_macro = recall_score(y_true, y_pre, average="macro", zero_division=0)
+        f1_macro = f1_score(y_true, y_pre, average="macro", zero_division=0)
         model.train()
-        return acc
+        return acc,p_macro,r_macro,f1_macro
 
 def train_T(loader, model, device, loss_fn, optim):
     model.train()
@@ -37,6 +44,10 @@ def train_T(loader, model, device, loss_fn, optim):
 # 加载数据集
 if __name__ == "__main__":
     writer = SummaryWriter('./log')
+    _,train_counter = dataset.pro_data(demo_config['train_path'])
+    all_label = sorted(train_counter.keys())
+    max_label = max(all_label)
+    num_labels = max_label + 1
     tokenizer = AutoTokenizer.from_pretrained(demo_config['model_path'])
     collate_fn = dataset.make_collate_fn(tokenizer, demo_config["max_length"])
     train = dataset.Mydata(demo_config['train_path'])
@@ -48,25 +59,40 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = model_m.Mymodel(model_path=demo_config["model_path"],
-                            num_labels=demo_config["num_labels"])
+                            num_labels=num_labels)
     model.to(device)
     optim = torch.optim.AdamW(model.parameters(),lr = demo_config['learning_rate'])
     loss_fn = torch.nn.CrossEntropyLoss()
     epoch = demo_config["epoch"]
     best_acc = 0.0
+    best_f1 = 0.0
+    patience = 3.0
+    early_stop = 0.0
     for e in range(epoch):
         print(f"===== Epoch {e+1}/{epoch} =====")
         avg_loss = train_T(train_loader,model, device, loss_fn, optim)
-        dev_acc = verify(dev_loader, model, device)
+        dev_acc, dev_p, dev_r, dev_f1 = verify(dev_loader, model, device)
         writer.add_scalar('aver/epoch', avg_loss, e + 1)
         writer.add_scalar('acc/epoch', dev_acc, e + 1)
-        print(f"train_loss:{avg_loss:.4f} | dev_acc:{dev_acc:.4f}")
+        writer.add_scalar('dev/p_macro', dev_p, e + 1)
+        writer.add_scalar('dev/r_macro', dev_r, e + 1)
+        writer.add_scalar('dev/f1_macro', dev_f1, e + 1)
+        print(f"train_loss:{avg_loss:.4f} | dev_acc:{dev_acc:.4f} | p_macro:{dev_p:.4f} | r_macro:{dev_r:.4f} | f1_macro:{dev_f1:.4f}")
         # 保存最优模型
-        if dev_acc > best_acc:
+        if dev_acc>best_acc :
             best_acc = dev_acc
+        if dev_f1 > best_f1:
+            best_f1= dev_f1
+            early_stop = 0.0
             torch.save(model.state_dict(),"./best_model.pth")
-            print(f"保存最优模型, best_acc:{best_acc:.4f}")
+            print(f"保存最优模型, best_f1:{best_f1:.4f}")
+        else:
+            early_stop += 1
+            if early_stop >patience:
+                print(f"连续{early_stop}轮没有提升，触发早停")
+                break
     print("训练结束，最优验证集精度：", best_acc)
+    writer.close()
 
 
 

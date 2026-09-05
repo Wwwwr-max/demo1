@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 import torch
+from collections import Counter
 # 处理数据
 def make_collate_fn(tokenizer, max_length):
     def collate_fn(items):
@@ -17,6 +18,7 @@ def make_collate_fn(tokenizer, max_length):
     return collate_fn
 def pro_data(root):
     items = []
+    labels_counter = Counter()
     with open(root,'r',encoding='utf-8') as f:
         for line in f:
             line = line.strip()
@@ -24,6 +26,7 @@ def pro_data(root):
                 continue
             id,code,name,text,key = line.split('_!_',maxsplit=4)
             labels = int(code)-100
+            labels_counter[labels] += 1
             if key:
                 text = key +','+text
             else:
@@ -32,13 +35,13 @@ def pro_data(root):
                 "text":text,
                 "labels":labels
             })
-    return items
+    return items,labels_counter
 
 # 重写dataset方法
 class Mydata(Dataset):
     def __init__(self,root):
         super(Mydata,self).__init__()
-        self.items = pro_data(root)
+        self.items,_ = pro_data(root)
 
     def __len__(self):
         return len(self.items)
