@@ -1,11 +1,45 @@
 import torch
 from transformers import AutoTokenizer
-from sklearn.metrics import precision_score, recall_score, f1_score
 import dataset,model_m,config
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 demo_config = config.load_config()
-def verify(loader, model, device):
+# tp,fp,fn--->对的预测为对，错的预测为对，对的预测为错
+def calc_macro_prf(y_true, y_pre, num_labels):
+    tp = [0]*num_labels
+    fp = [0]*num_labels
+    fn = [0]*num_labels
+    for t, p in zip(y_true, y_pre):
+        if t == p:
+            tp[t] += 1
+        else:
+            fp[p] += 1
+            fn[t] += 1
+    p_list = []
+    r_list = []
+    f1_list = []
+    # 计算每个分类的p,r,f
+    for i in range(num_labels):
+        if tp[i] + fp[i] == 0:
+            pi = 0.0
+        else:
+            pi = tp[i] / (tp[i] + fp[i])
+        if tp[i] + fn[i] == 0:
+            ri = 0.0
+        else:
+            ri = tp[i] / (tp[i] + fn[i])
+        if pi + ri == 0:
+            fi = 0.0
+        else:
+            fi = 2 * pi * ri / (pi + ri)
+        p_list.append(pi)
+        r_list.append(ri)
+        f1_list.append(fi)
+    p_macro = sum(p_list) / num_labels
+    r_macro = sum(r_list) / num_labels
+    f1_macro = sum(f1_list) / num_labels
+    return  p_macro, r_macro, f1_macro
+def verify(loader, model, device,num_labels):
     model.eval()
     total_correct = 0
     total_num = 0
@@ -21,9 +55,7 @@ def verify(loader, model, device):
             y_true.extend(batch['labels'].cpu().numpy().tolist())
             y_pre.extend(per.cpu().numpy().tolist())
         acc = total_correct / total_num
-        p_macro = precision_score(y_true, y_pre, average="macro", zero_division=0)
-        r_macro = recall_score(y_true, y_pre, average="macro", zero_division=0)
-        f1_macro = f1_score(y_true, y_pre, average="macro", zero_division=0)
+        p_macro, r_macro, f1_macro = calc_macro_prf(y_true, y_pre, num_labels)
         model.train()
         return acc,p_macro,r_macro,f1_macro
 
@@ -71,7 +103,7 @@ if __name__ == "__main__":
     for e in range(epoch):
         print(f"===== Epoch {e+1}/{epoch} =====")
         avg_loss = train_T(train_loader,model, device, loss_fn, optim)
-        dev_acc, dev_p, dev_r, dev_f1 = verify(dev_loader, model, device)
+        dev_acc, dev_p, dev_r, dev_f1 = verify(dev_loader, model, device,num_labels)
         writer.add_scalar('aver/epoch', avg_loss, e + 1)
         writer.add_scalar('acc/epoch', dev_acc, e + 1)
         writer.add_scalar('dev/p_macro', dev_p, e + 1)
