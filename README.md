@@ -33,7 +33,7 @@ demo1
   `Mydata` 继承 `torch.utils.data.Dataset`，保存文本和标签。
   `make_collate_fn(tokenizer, max_length)`：对一个 batch 的文本进行截断、填充和标签整理。
 - `model_m.py`。
-  - `Mymodel`：使用 `BertModel + Linear`，取 BERT 输出的 CLS 向量，再经过全连接层输出 logits。
+  `Mymodel`：使用 `BertModel + Linear`，取 BERT 输出的 CLS 向量，再经过全连接层输出 logits。
 
 - `train.py`
   加载配置和数据，完成训练和验证。`train_T()` 执行一轮训练，`verify()` 在验证集上计算准确率,精确率，召回率，F1，并在每个 epoch 使用 TensorBoard 记录指标；验证集准确率更高时保存 `best_model.pth`。
